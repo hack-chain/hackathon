@@ -70,7 +70,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:listSelector="@color/gray"
+        android:listSelector="@color/accent"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"/>
 

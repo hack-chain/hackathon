@@ -3,6 +3,7 @@ package com.example.dmitry.ftm;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.design.widget.NavigationView;
@@ -14,14 +15,18 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -65,8 +70,6 @@ public class tabbedActivity extends AppCompatActivity {
 
          publicKey = (String) getIntent().getStringExtra("PUBLIC_KEY");
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -142,6 +145,9 @@ public class tabbedActivity extends AppCompatActivity {
          */
         private static final String PUBLIC_KEY = "PUBLIC KEY";
 
+        // UI references.
+        private AutoCompleteTextView publicKeyView;
+        private EditText privateKeyView;
         ImageView imageView;
         ArrayList<String> arrayList;
         ArrayAdapter<String> adapter;
@@ -202,18 +208,13 @@ public class tabbedActivity extends AppCompatActivity {
 
             listview.setItemChecked(0,true);
 
-            Button btn = (Button) rootView.findViewById(R.id.addBtn);
-            btn.setOnClickListener(new View.OnClickListener() {
+            Button mEmailSignInButton = (Button) rootView.findViewById(R.id.addBtn);
+            mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // this line adds the data of your EditText and puts in your array
-                    //arrayList.add("ALARM");
-                    // next thing you have to do is check if your adapter has changed
-                    //adapter.notifyDataSetChanged();
                     showInputDialog();
                 }
             });
-
 
             return rootView;
         }
@@ -226,11 +227,25 @@ public class tabbedActivity extends AppCompatActivity {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
             alertDialogBuilder.setView(promptView);
 
-            final EditText editText = (EditText) promptView.findViewById(R.id.edittext);
+            publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKey);
+
+            privateKeyView = (EditText) promptView.findViewById(R.id.privateKey);
+            privateKeyView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                    if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
+                        attemptLogin();
+                        return true;
+                    }
+                    return false;
+                }
+            });
             // setup a dialog window
             alertDialogBuilder.setCancelable(false)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) { PublicKey.setText("Hello, " + editText.getText());
+                        public void onClick(DialogInterface dialog, int id) {
+                            arrayList.add(publicKeyView.getText().toString());
+                            adapter.notifyDataSetChanged();
                         }
                     })
                     .setNegativeButton("Cancel",
@@ -289,9 +304,58 @@ public class tabbedActivity extends AppCompatActivity {
                 }
             }
         }
+
+        private void attemptLogin() {
+
+            publicKeyView.setError(null);
+            privateKeyView.setError(null);
+
+            // Store values at the time of the login attempt.
+            String publicKey = publicKeyView.getText().toString();
+            String privateKey = privateKeyView.getText().toString();
+
+            boolean cancel = false;
+            View focusView = null;
+
+            if (TextUtils.isEmpty(publicKey)) {
+                publicKeyView.setError(getString(R.string.error_field_required));
+                focusView = publicKeyView;
+                cancel = true;
+            } else if (!isEmailValid(publicKey)) {
+                publicKeyView.setError(getString(R.string.error_invalid_public_key));
+                focusView = publicKeyView;
+                cancel = true;
+            }
+
+            if (TextUtils.isEmpty(privateKey)){
+                privateKeyView.setError(getString(R.string.error_field_required));
+                focusView = privateKeyView;
+                cancel = true;
+            } else if(!isPasswordValid(privateKey)) {
+                privateKeyView.setError(getString(R.string.error_invalid_password));
+                focusView = privateKeyView;
+                cancel = true;
+            }
+
+            if (cancel) {
+                // There was an error; don't attempt login and focus the first
+                // form field with an error.
+                focusView.requestFocus();
+            } else {
+                focusView.requestFocus();
+            }
+        }
+
+        private boolean isEmailValid(String email) {
+            //TODO: Replace this with your own logic
+            return true;
+        }
+
+        private boolean isPasswordValid(String password) {
+            //TODO: Replace this with your own logic
+            return true;
+        }
     }
-
-
 
     public static class SecondFragment extends Fragment {
         /**

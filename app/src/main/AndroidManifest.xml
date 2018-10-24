@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/theme"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".LoginActivity"
@@ -22,14 +22,13 @@
             android:theme="@style/theme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".tabbedActivity"
             android:label="@string/title_activity_tabbed"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/theme" />
     </application>
 
 </manifest>

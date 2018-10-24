@@ -11,7 +11,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -91,7 +90,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
 
-        if (!TextUtils.isEmpty(privateKey) && !isPasswordValid(privateKey)) {
+        if (TextUtils.isEmpty(privateKey)){
+            privateKeyView.setError(getString(R.string.error_field_required));
+            focusView = privateKeyView;
+            cancel = true;
+        } else if(!isPasswordValid(privateKey)) {
             privateKeyView.setError(getString(R.string.error_invalid_password));
             focusView = privateKeyView;
             cancel = true;

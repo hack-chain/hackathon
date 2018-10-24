@@ -6,24 +6,35 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Enter Name"
-        android:id="@+id/textView" />
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/edittext"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter public key here.."
-        android:padding="10dp" />
+        <AutoCompleteTextView
+            android:id="@+id/publicKey"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:hint="@string/prompt_key"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+            android:singleLine="true" />
 
-    <EditText
-        android:id="@+id/editText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter private key here.."
-        android:padding="10dp" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/privateKey"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:hint="@string/prompt_password"
+            android:imeActionId="6"
+            android:imeActionLabel="@string/action_sign_in_short"
+            android:imeOptions="actionUnspecified"
+            android:maxLines="1"
+            android:singleLine="true" />
+
+    </android.support.design.widget.TextInputLayout>
 </LinearLayout>

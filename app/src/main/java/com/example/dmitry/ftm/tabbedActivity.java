@@ -1,14 +1,10 @@
 package com.example.dmitry.ftm;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -34,7 +30,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -68,13 +63,10 @@ public class tabbedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabbed);
 
-         publicKey = (String) getIntent().getStringExtra("PUBLIC_KEY");
+        publicKey = (String) getIntent().getStringExtra("PUBLIC_KEY");
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
     }
@@ -82,19 +74,14 @@ public class tabbedActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_tabbed, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -106,19 +93,11 @@ public class tabbedActivity extends AppCompatActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         public PlaceholderFragment() {
         }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
@@ -139,21 +118,21 @@ public class tabbedActivity extends AppCompatActivity {
 
 
     public static class FirstFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
         private static final String PUBLIC_KEY = "PUBLIC KEY";
 
-        // UI references.
+        private ImageView imageView;
+        private TextView publicKey;
+        private TextView moneyView;
+
+        private ArrayList<String> arrayList;
+        private ArrayAdapter<String> adapter;
+        private Button addButtonView;
+
+        private LayoutInflater layoutInflater;
+        private View promptView;
         private AutoCompleteTextView publicKeyView;
         private EditText privateKeyView;
-        ImageView imageView;
-        ArrayList<String> arrayList;
-        ArrayAdapter<String> adapter;
-        TextView PublicKey;
-        TextView moneyView;
-        LayoutInflater layoutInflater;
+
         public FirstFragment() {
         }
 
@@ -177,15 +156,13 @@ public class tabbedActivity extends AppCompatActivity {
             Bitmap identicon = Identicon.create(getArguments().getString(PUBLIC_KEY));
             imageView.setImageBitmap(identicon);
 
-            PublicKey = (TextView) rootView.findViewById(R.id.textView);
-            PublicKey.setText(getArguments().getString(PUBLIC_KEY));
+            publicKey = (TextView) rootView.findViewById(R.id.textView);
+            publicKey.setText(getArguments().getString(PUBLIC_KEY));
 
             moneyView = (TextView) rootView.findViewById(R.id.moneyView);
+            new getdata().execute(getArguments().getString(PUBLIC_KEY));
 
-            //now you must initialize your list view
             ListView listview =(ListView)rootView.findViewById(R.id.list);
-
-            //EDITED Code
             arrayList = new ArrayList<String> ();
             arrayList.add(getArguments().getString(PUBLIC_KEY));
 
@@ -197,7 +174,7 @@ public class tabbedActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String selectedItem = (String) parent.getItemAtPosition(position);
-                    PublicKey.setText(selectedItem);
+                    publicKey.setText(selectedItem);
 
                     Bitmap identicon = Identicon.create(selectedItem);
                     imageView.setImageBitmap(identicon);
@@ -208,8 +185,8 @@ public class tabbedActivity extends AppCompatActivity {
 
             listview.setItemChecked(0,true);
 
-            Button mEmailSignInButton = (Button) rootView.findViewById(R.id.addBtn);
-            mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
+            addButtonView = (Button) rootView.findViewById(R.id.addBtn);
+            addButtonView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     showInputDialog();
@@ -222,30 +199,20 @@ public class tabbedActivity extends AppCompatActivity {
         protected void showInputDialog() {
 
             // get prompts.xml view
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
+            layoutInflater = LayoutInflater.from(getActivity());
+            promptView = layoutInflater.inflate(R.layout.input_dialog, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
             alertDialogBuilder.setView(promptView);
 
-            publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKey);
+            publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+            privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
 
-            privateKeyView = (EditText) promptView.findViewById(R.id.privateKey);
-            privateKeyView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                    if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                        attemptLogin();
-                        return true;
-                    }
-                    return false;
-                }
-            });
             // setup a dialog window
             alertDialogBuilder.setCancelable(false)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            arrayList.add(publicKeyView.getText().toString());
-                            adapter.notifyDataSetChanged();
+                            attemptLogin();
+                            dialog.dismiss();
                         }
                     })
                     .setNegativeButton("Cancel",
@@ -338,11 +305,9 @@ public class tabbedActivity extends AppCompatActivity {
             }
 
             if (cancel) {
-                // There was an error; don't attempt login and focus the first
-                // form field with an error.
-                focusView.requestFocus();
             } else {
-                focusView.requestFocus();
+                arrayList.add(publicKeyView.getText().toString());
+                adapter.notifyDataSetChanged();
             }
         }
 
@@ -419,10 +384,7 @@ public class tabbedActivity extends AppCompatActivity {
             return rootView;
         }
     }
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -431,13 +393,9 @@ public class tabbedActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             switch(position) {
                 case 0:
-                    Fragment tmp = FirstFragment.newInstance(publicKey);
-                    new getData().execute(publicKey);
-                    return tmp;
+                    return FirstFragment.newInstance(publicKey);
                 case 1:
                     return SecondFragment.newInstance(6);
                 case 2:
@@ -448,54 +406,7 @@ public class tabbedActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
             return 3;
-        }
-    }
-
-    public class getData extends AsyncTask<String, String, String> {
-
-        HttpURLConnection urlConnection;
-
-        @Override
-        protected String doInBackground(String... args) {
-
-            StringBuilder result = new StringBuilder();
-
-            try {
-                String publicKey = args[0];
-                URL url = new URL("http://18.221.128.6:8080/account/" + publicKey);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                urlConnection.disconnect();
-            }
-
-
-            return result.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            try {
-                JSONObject mainObject = new JSONObject(result);
-                String balance = mainObject.getString("balance");
-
-                TextView PublicKey = findViewById(R.id.moneyView);
-                PublicKey.setText("Balance: "+ balance);
-            } catch (Exception e) {
-
-            }
         }
     }
 }

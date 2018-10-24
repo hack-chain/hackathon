@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".tabbedActivity$PlaceholderFragment">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="10dp"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:contentDescription="@string/nav_header_desc"
+        app:srcCompat="@mipmap/ic_launcher_round" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_marginTop="180dp"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:textSize="16sp"
+        android:text=""
+        android:textColor="@color/colorPrimary"/>
+
+
+    <TextView
+        android:id="@+id/moneyView"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_marginTop="200dp"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:textSize="16sp"
+        android:text="0"
+        android:textColor="@color/colorPrimary"/>
+
+    <ListView
+        android:id="@+id/list"
+
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="220dp"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:listSelector="@color/gray"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"/>
+
+    <Button
+        android:id="@+id/addBtn"
+
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:textStyle="bold"
+        android:background="@drawable/button_border"
+
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="500dp"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:text="Add new account"
+        android:onClick="addItems"/>
+
+</android.support.constraint.ConstraintLayout>

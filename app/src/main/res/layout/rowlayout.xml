@@ -12,6 +12,7 @@
         android:text="@+id/label"
         android:textSize="20sp"
         android:textColor="@color/textColor"
+        android:textStyle="bold"
         android:fontFamily="monospace"
 
         android:singleLine="true"

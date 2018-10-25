@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -30,22 +29,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 public class tabbedActivity extends AppCompatActivity {
     private static final String INIT_PUBLIC_KEY = "PUBLIC_KEY";
-    private String initPublicKey;
+    private String _initPublicKey;
+
+    private static final String INIT_PRIVATE_KEY = "PRIVATE_KEY";
+    private String _initPrivateKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,60 +51,37 @@ public class tabbedActivity extends AppCompatActivity {
         ViewPager _ViewPager = (ViewPager) findViewById(R.id.container);
         _ViewPager.setAdapter(_SectionsPagerAdapter);
 
-        initPublicKey = (String) getIntent().getStringExtra(INIT_PUBLIC_KEY);
+        _initPublicKey = (String) getIntent().getStringExtra(INIT_PUBLIC_KEY);
+        _initPrivateKey = (String) getIntent().getStringExtra(INIT_PRIVATE_KEY);
     }
 
     public static class FirstFragment extends Fragment {
-        private ArrayList<String> arrayList;
-        private ArrayAdapter<String> adapter;
-        private Button addButtonView;
+        private ArrayList<String> _arrayList;
+        private ArrayAdapter<String> _adapter;
 
-        private LayoutInflater layoutInflater;
-        private View promptView;
-        private AutoCompleteTextView publicKeyView;
-        private EditText privateKeyView;
+        public FirstFragment() {}
 
-        private AlertDialog dialog;
-
-        public FirstFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
         public static FirstFragment newInstance(String publicKey) {
-            FirstFragment fragment = new FirstFragment();
+            FirstFragment firstFragment = new FirstFragment();
             Bundle args = new Bundle();
             args.putString(INIT_PUBLIC_KEY, publicKey);
-            fragment.setArguments(args);
-            return fragment;
+            firstFragment.setArguments(args);
+            return firstFragment;
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_first, container, false);
 
-            ListView listview =(ListView)rootView.findViewById(R.id.list);
-            arrayList = new ArrayList<String> ();
-            arrayList.add(getArguments().getString(INIT_PUBLIC_KEY));
+            _arrayList = new ArrayList<String> ();
+            _arrayList.add(getArguments().getString(INIT_PUBLIC_KEY));
 
-            adapter = new MySimpleArrayAdapter(getActivity(), arrayList);
+            _adapter = new CustomArrayAdapter(getActivity(), _arrayList);
 
-            listview.setAdapter(adapter);
+            ListView listView = (ListView) rootView.findViewById(R.id.list);
+            listView.setAdapter(_adapter);
 
-            listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String selectedItem = (String) parent.getItemAtPosition(position);
-
-                    Bitmap identicon = Identicon.create(selectedItem);
-                }
-            });
-
-            listview.setItemChecked(0,true);
-
-            addButtonView = (Button) rootView.findViewById(R.id.addBtn);
+            Button addButtonView = (Button) rootView.findViewById(R.id.addBtn);
             addButtonView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -121,37 +92,34 @@ public class tabbedActivity extends AppCompatActivity {
             return rootView;
         }
 
-        public class MySimpleArrayAdapter extends ArrayAdapter<String> {
-            private final Context context;
-            private final ArrayList<String> values;
+        public class CustomArrayAdapter extends ArrayAdapter<String> {
+            private final Context _context;
+            private final ArrayList<String> _values;
 
-            public MySimpleArrayAdapter(Context context, ArrayList<String> values) {
+            CustomArrayAdapter(Context context, ArrayList<String> values) {
                 super(context, R.layout.rowlayout, values);
-                this.context = context;
-                this.values = values;
+                this._context = context;
+                this._values = values;
             }
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                LayoutInflater inflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
 
                 TextView publicKeyView = (TextView) rowView.findViewById(R.id.publicKey);
-                TextView money = (TextView) rowView.findViewById(R.id.money);
-                publicKeyView.setText(values.get(position));
+                TextView moneyView = (TextView) rowView.findViewById(R.id.money);
 
-                // Change the icon for Windows and iPhone
-                String s = values.get(position);
+                String publicKey = _values.get(position);
 
-                publicKeyView.setTypeface(publicKeyView.getTypeface(), Typeface.BOLD);
+                publicKeyView.setText(publicKey);
 
                 GetAndSetBalanceAsync task = new GetAndSetBalanceAsync();
-                task._view = new WeakReference<TextView>(money);
-                task.execute(s);
+                task._view = new WeakReference<TextView>(moneyView);
+                task.execute(publicKey);
 
                 ImageView image = (ImageView) rowView.findViewById(R.id.imageView);
-                Bitmap identicon = Identicon.create(s);
+                Bitmap identicon = Identicon.create(publicKey);
                 image.setImageBitmap(identicon);
 
                 return rowView;
@@ -159,69 +127,59 @@ public class tabbedActivity extends AppCompatActivity {
         }
 
         protected void showInputDialog() {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
 
-            // get prompts.xml view
-            layoutInflater = LayoutInflater.from(getActivity());
-            promptView = layoutInflater.inflate(R.layout.input_dialog, null);
-
-            dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
+            final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
                     .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
 
 
-            publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
-            privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
+            final AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+            final EditText privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
 
-            Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(new View.OnClickListener() {
-
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    attemptLogin();
+                    publicKeyView.setError(null);
+                    privateKeyView.setError(null);
+
+                    String publicKey = publicKeyView.getText().toString();
+                    String privateKey = privateKeyView.getText().toString();
+
+                    boolean cancel = false;
+                    View focusView = null;
+
+                    if (TextUtils.isEmpty(publicKey)) {
+                        publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
+                        focusView = publicKeyView;
+                        cancel = true;
+                    } else if (!isEmailValid(publicKey)) {
+                        publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid public ke</font>"));
+                        focusView = publicKeyView;
+                        cancel = true;
+                    }
+
+                    if (TextUtils.isEmpty(privateKey)){
+                        privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
+                        focusView = privateKeyView;
+                        cancel = true;
+                    } else if(!isPasswordValid(privateKey)) {
+                        privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid private key</font>"));
+                        focusView = privateKeyView;
+                        cancel = true;
+                    }
+
+                    if (cancel) {
+                        focusView.requestFocus();
+                    } else {
+                        _arrayList.add(publicKeyView.getText().toString());
+                        _adapter.notifyDataSetChanged();
+                        dialog.cancel();
+                    }
                 }
             });
-        }
-
-        private void attemptLogin() {
-
-            publicKeyView.setError(null);
-            privateKeyView.setError(null);
-
-            // Store values at the time of the login attempt.
-            String publicKey = publicKeyView.getText().toString();
-            String privateKey = privateKeyView.getText().toString();
-
-            boolean cancel = false;
-            View focusView = null;
-
-            if (TextUtils.isEmpty(publicKey)) {
-                publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
-                focusView = publicKeyView;
-                cancel = true;
-            } else if (!isEmailValid(publicKey)) {
-                publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid public ke</font>"));
-                focusView = publicKeyView;
-                cancel = true;
-            }
-
-            if (TextUtils.isEmpty(privateKey)){
-                privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
-                focusView = privateKeyView;
-                cancel = true;
-            } else if(!isPasswordValid(privateKey)) {
-                privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid private key</font>"));
-                focusView = privateKeyView;
-                cancel = true;
-            }
-
-            if (cancel) {
-                focusView.requestFocus();
-            } else {
-                arrayList.add(publicKeyView.getText().toString());
-                adapter.notifyDataSetChanged();
-                dialog.cancel();
-            }
         }
 
         private boolean isEmailValid(String email) {
@@ -412,7 +370,7 @@ public class tabbedActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch(position) {
                 case 0:
-                    return FirstFragment.newInstance(initPublicKey);
+                    return FirstFragment.newInstance(_initPublicKey);
                 case 1:
                     return SecondFragment.newInstance(6);
                 default:

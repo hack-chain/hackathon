@@ -38,7 +38,9 @@
         android:textSize="16sp"
         android:text=""
         android:textStyle="bold"
-        android:textColor="@color/colorPrimary"/>
+        android:textColor="@color/colorPrimary"
+
+        android:visibility="invisible"/>
 
 
     <TextView
@@ -57,7 +59,9 @@
         android:textSize="16sp"
         android:text="0"
         android:textStyle="bold"
-        android:textColor="@color/colorPrimary"/>
+        android:textColor="@color/colorPrimary"
+
+        android:visibility="invisible"/>
 
     <ListView
         android:id="@+id/list"

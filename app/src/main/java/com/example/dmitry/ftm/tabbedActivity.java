@@ -3,6 +3,7 @@ package com.example.dmitry.ftm;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -226,6 +227,8 @@ public class tabbedActivity extends AppCompatActivity {
 
                 // Change the icon for Windows and iPhone
                 String s = values.get(position);
+
+                publicKeyView.setTypeface(publicKeyView.getTypeface(), Typeface.BOLD);
 
                 getdata task = new getdata();
                 task._view = money;

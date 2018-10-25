@@ -1,16 +1,15 @@
 package com.example.dmitry.ftm;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
-
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -18,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -165,13 +163,16 @@ public class tabbedActivity extends AppCompatActivity {
             publicKey.setText(getArguments().getString(PUBLIC_KEY));
 
             moneyView = (TextView) rootView.findViewById(R.id.moneyView);
-            new getdata().execute(getArguments().getString(PUBLIC_KEY));
+
+            getdata task = new getdata();
+            task._view = moneyView;
+            task.execute(getArguments().getString(PUBLIC_KEY));
 
             ListView listview =(ListView)rootView.findViewById(R.id.list);
             arrayList = new ArrayList<String> ();
             arrayList.add(getArguments().getString(PUBLIC_KEY));
 
-            adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, arrayList);
+            adapter = new MySimpleArrayAdapter(getActivity(), arrayList);
 
             listview.setAdapter(adapter);
 
@@ -184,7 +185,9 @@ public class tabbedActivity extends AppCompatActivity {
                     Bitmap identicon = Identicon.create(selectedItem);
                     imageView.setImageBitmap(identicon);
 
-                    new getdata().execute(selectedItem);
+                    getdata task = new getdata();
+                    task._view = moneyView;
+                    task.execute(selectedItem);
                 }
             });
 
@@ -200,6 +203,38 @@ public class tabbedActivity extends AppCompatActivity {
 
             return rootView;
         }
+
+        public class MySimpleArrayAdapter extends ArrayAdapter<String> {
+            private final Context context;
+            private final ArrayList<String> values;
+
+            public MySimpleArrayAdapter(Context context, ArrayList<String> values) {
+                super(context, R.layout.rowlayout, values);
+                this.context = context;
+                this.values = values;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                LayoutInflater inflater = (LayoutInflater) context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
+
+                TextView publicKeyView = (TextView) rowView.findViewById(R.id.publicKey);
+                TextView money = (TextView) rowView.findViewById(R.id.money);
+                publicKeyView.setText(values.get(position));
+
+                // Change the icon for Windows and iPhone
+                String s = values.get(position);
+
+                getdata task = new getdata();
+                task._view = money;
+                task.execute(s);
+
+                return rowView;
+            }
+        }
+
 
         protected void showInputDialog() {
 
@@ -229,7 +264,7 @@ public class tabbedActivity extends AppCompatActivity {
         public class getdata extends AsyncTask<String, String, String> {
 
             HttpURLConnection urlConnection;
-
+            TextView _view;
             @Override
             protected String doInBackground(String... args) {
 
@@ -264,7 +299,7 @@ public class tabbedActivity extends AppCompatActivity {
                     JSONObject mainObject = new JSONObject(result);
                     String balance = mainObject.getString("balance");
 
-                    moneyView.setText("Balance: "+ balance);
+                    _view.setText("Balance: "+ balance);
                 } catch (Exception e) {
 
                 }

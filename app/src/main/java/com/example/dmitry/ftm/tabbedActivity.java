@@ -3,9 +3,7 @@ package com.example.dmitry.ftm;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -195,22 +193,11 @@ public class tabbedActivity extends AppCompatActivity {
 
     public static class SecondFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private static final String POPUP_CONSTANT = "mPopup";
+        private static final String POPUP_FORCE_SHOW_ICON = "setForceShowIcon";
 
-        private static String POPUP_CONSTANT = "mPopup";
-        private static String POPUP_FORCE_SHOW_ICON = "setForceShowIcon";
-        String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-        ArrayAdapter<String> adapter;
-        ListView listView;
-        FloatingActionButton fabView;
-
-        private LayoutInflater layoutInflater;
-        private View promptView;
-        private AutoCompleteTextView publicKeyView;
-        private EditText privateKeyView;
-
-        private AlertDialog dialog;
-
-        private ArrayList<String> arrayList;
+        ArrayAdapter<String> _adapter;
+        ListView _listView;
 
         public SecondFragment() {
         }
@@ -224,25 +211,25 @@ public class tabbedActivity extends AppCompatActivity {
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_second, container, false);
 
-            adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, days);
-            listView = (ListView) rootView.findViewById(R.id.lvDays);
-            listView.setAdapter(adapter);
-            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            ArrayList<String> operations = new ArrayList<String>();
+
+            _adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, operations);
+
+            _listView = (ListView) rootView.findViewById(R.id.operations);
+            _listView.setAdapter(_adapter);
+            _listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                    listView.setItemChecked(position, true);
+                    _listView.setItemChecked(position, true);
                     showPopup(view);
                 }
             });
 
-            fabView = (FloatingActionButton) rootView.findViewById(R.id.fab);
-
-            fabView.setOnClickListener(new View.OnClickListener() {
+            rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     showInputDialog();
@@ -254,27 +241,26 @@ public class tabbedActivity extends AppCompatActivity {
 
         protected void showInputDialog() {
 
-            // get prompts.xml view
-            layoutInflater = LayoutInflater.from(getActivity());
-            promptView = layoutInflater.inflate(R.layout.second_dialog, null);
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            View promptView = layoutInflater.inflate(R.layout.second_dialog, null);
 
-            dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
+            final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
                     .setPositiveButton(android.R.string.ok, null)
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
 
 
-            publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+            AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
 
             Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
 
             Bundle bundle=getArguments();
-            arrayList = bundle.getStringArrayList("LIST");
+            ArrayList<String> publicKeyList = bundle.getStringArrayList("LIST");
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, arrayList);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, publicKeyList);
             dropdown.setAdapter(adapter);
 
-            privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
+            EditText privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
 
             Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(new View.OnClickListener() {
@@ -311,7 +297,7 @@ public class tabbedActivity extends AppCompatActivity {
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            String selectedItem = adapter.getItem(listView.getCheckedItemPosition());
+            String selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
             switch (item.getItemId()) {
                 case R.id.pmnuDelete:
                     Toast.makeText(this.getContext(), "You clicked delete on Item : " + selectedItem, Toast.LENGTH_SHORT).show();

@@ -101,8 +101,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
 
-
-
         if (cancel) {
             focusView.requestFocus();
         } else {

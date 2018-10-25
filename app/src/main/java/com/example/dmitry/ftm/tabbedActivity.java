@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -135,6 +136,8 @@ public class tabbedActivity extends AppCompatActivity {
         private AutoCompleteTextView publicKeyView;
         private EditText privateKeyView;
 
+        private AlertDialog dialog;
+
         public FirstFragment() {
         }
 
@@ -203,30 +206,24 @@ public class tabbedActivity extends AppCompatActivity {
             // get prompts.xml view
             layoutInflater = LayoutInflater.from(getActivity());
             promptView = layoutInflater.inflate(R.layout.input_dialog, null);
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-            alertDialogBuilder.setView(promptView);
+
+            dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+
 
             publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
             privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
 
-            // setup a dialog window
-            alertDialogBuilder.setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            attemptLogin();
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
+            Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(new View.OnClickListener() {
 
-            // create an alert dialog
-            AlertDialog alert = alertDialogBuilder.create();
-            alert.show();
+                @Override
+                public void onClick(View view) {
+                    attemptLogin();
+                }
+            });
         }
 
         public class getdata extends AsyncTask<String, String, String> {
@@ -287,29 +284,31 @@ public class tabbedActivity extends AppCompatActivity {
             View focusView = null;
 
             if (TextUtils.isEmpty(publicKey)) {
-                publicKeyView.setError(getString(R.string.error_field_required));
+                publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
                 focusView = publicKeyView;
                 cancel = true;
             } else if (!isEmailValid(publicKey)) {
-                publicKeyView.setError(getString(R.string.error_invalid_public_key));
+                publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid public ke</font>"));
                 focusView = publicKeyView;
                 cancel = true;
             }
 
             if (TextUtils.isEmpty(privateKey)){
-                privateKeyView.setError(getString(R.string.error_field_required));
+                privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
                 focusView = privateKeyView;
                 cancel = true;
             } else if(!isPasswordValid(privateKey)) {
-                privateKeyView.setError(getString(R.string.error_invalid_password));
+                privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid private key</font>"));
                 focusView = privateKeyView;
                 cancel = true;
             }
 
             if (cancel) {
+                focusView.requestFocus();
             } else {
                 arrayList.add(publicKeyView.getText().toString());
                 adapter.notifyDataSetChanged();
+                dialog.cancel();
             }
         }
 

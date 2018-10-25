@@ -8,8 +8,7 @@
     android:id="@+id/secondFragment"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".tabbedActivity$PlaceholderFragment">
+    android:paddingTop="@dimen/activity_vertical_margin">
 
     <ListView
         android:id="@+id/lvDays"

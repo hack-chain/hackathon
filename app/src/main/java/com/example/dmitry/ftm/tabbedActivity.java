@@ -46,20 +46,8 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class tabbedActivity extends AppCompatActivity {
-
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     private ViewPager mViewPager;
 
     private String publicKey;
@@ -98,10 +86,6 @@ public class tabbedActivity extends AppCompatActivity {
     public static class FirstFragment extends Fragment {
         private static final String PUBLIC_KEY = "PUBLIC KEY";
 
-        private ImageView imageView;
-        private TextView publicKey;
-        private TextView moneyView;
-
         private ArrayList<String> arrayList;
         private ArrayAdapter<String> adapter;
         private Button addButtonView;
@@ -112,9 +96,6 @@ public class tabbedActivity extends AppCompatActivity {
         private EditText privateKeyView;
 
         private AlertDialog dialog;
-
-        SharedPreferences preferences;
-        public static final String MY_SHARED_PREFERENCES = "MySharedPrefs";
 
         public FirstFragment() {
         }
@@ -135,19 +116,6 @@ public class tabbedActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_first, container, false);
 
-            imageView = (ImageView) rootView.findViewById(R.id.imageView);
-            Bitmap identicon = Identicon.create(getArguments().getString(PUBLIC_KEY));
-            imageView.setImageBitmap(identicon);
-
-            publicKey = (TextView) rootView.findViewById(R.id.textView);
-            publicKey.setText(getArguments().getString(PUBLIC_KEY));
-
-            moneyView = (TextView) rootView.findViewById(R.id.moneyView);
-
-            getdata task = new getdata();
-            task._view = moneyView;
-            task.execute(getArguments().getString(PUBLIC_KEY));
-
             ListView listview =(ListView)rootView.findViewById(R.id.list);
             arrayList = new ArrayList<String> ();
             arrayList.add(getArguments().getString(PUBLIC_KEY));
@@ -160,14 +128,8 @@ public class tabbedActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String selectedItem = (String) parent.getItemAtPosition(position);
-                    publicKey.setText(selectedItem);
 
                     Bitmap identicon = Identicon.create(selectedItem);
-                    imageView.setImageBitmap(identicon);
-
-                    getdata task = new getdata();
-                    task._view = moneyView;
-                    task.execute(selectedItem);
                 }
             });
 
@@ -212,6 +174,10 @@ public class tabbedActivity extends AppCompatActivity {
                 getdata task = new getdata();
                 task._view = money;
                 task.execute(s);
+
+                ImageView image = (ImageView) rowView.findViewById(R.id.imageView);
+                Bitmap identicon = Identicon.create(s);
+                image.setImageBitmap(identicon);
 
                 return rowView;
             }

@@ -27,7 +27,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -35,6 +37,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -322,22 +326,20 @@ public class tabbedActivity extends AppCompatActivity {
         }
     }
 
-    public static class SecondFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
+    public static class SecondFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
         private static final String ARG_SECTION_NUMBER = "section_number";
+
+        private static String POPUP_CONSTANT = "mPopup";
+        private static String POPUP_FORCE_SHOW_ICON = "setForceShowIcon";
+        String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        ArrayAdapter<String> adapter;
+        ListView lvDays;
 
         public SecondFragment() {
         }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static SecondFragment newInstance(int sectionNumber) {
+            SecondFragment fragment = new SecondFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -347,12 +349,65 @@ public class tabbedActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_tabbed, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+            View rootView = inflater.inflate(R.layout.fragment_second, container, false);
+
+            adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, days);
+            lvDays = (ListView) rootView.findViewById(R.id.lvDays);
+            lvDays.setAdapter(adapter);
+            lvDays.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            lvDays.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                    lvDays.setItemChecked(position, true);
+                    showPopup(view);
+                }
+            });
+
             return rootView;
         }
+
+        public void showPopup(View view) {
+            PopupMenu popup = new PopupMenu(getActivity(), view);
+            try {
+                // Reflection apis to enforce show icon
+                Field[] fields = popup.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    if (field.getName().equals(POPUP_CONSTANT)) {
+                        field.setAccessible(true);
+                        Object menuPopupHelper = field.get(popup);
+                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                        Method setForceIcons = classPopupHelper.getMethod(POPUP_FORCE_SHOW_ICON, boolean.class);
+                        setForceIcons.invoke(menuPopupHelper, true);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+            popup.setOnMenuItemClickListener(this);
+            popup.show();
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            String selectedItem = adapter.getItem(lvDays.getCheckedItemPosition());
+            switch (item.getItemId()) {
+                case R.id.pmnuDelete:
+                    Toast.makeText(this.getContext(), "You clicked delete on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.pmnuEdit:
+                    Toast.makeText(this.getContext(), "You clicked edit on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.pmnuShare:
+                    Toast.makeText(this.getContext(), "You clicked share on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
+            return false;
+        }
     }
+
     public static class ThirdFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this

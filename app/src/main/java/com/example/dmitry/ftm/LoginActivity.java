@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -81,21 +82,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         View focusView = null;
 
         if (TextUtils.isEmpty(publicKey)) {
-            publicKeyView.setError(getString(R.string.error_field_required));
+            publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
             focusView = publicKeyView;
             cancel = true;
         } else if (!isEmailValid(publicKey)) {
-            publicKeyView.setError(getString(R.string.error_invalid_public_key));
+            publicKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid public ke</font>"));
             focusView = publicKeyView;
             cancel = true;
         }
 
         if (TextUtils.isEmpty(privateKey)){
-            privateKeyView.setError(getString(R.string.error_field_required));
+            privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>This field is required</font>"));
             focusView = privateKeyView;
             cancel = true;
         } else if(!isPasswordValid(privateKey)) {
-            privateKeyView.setError(getString(R.string.error_invalid_password));
+            privateKeyView.setError(Html.fromHtml("<font color='#ffffff'>Invalid private key</font>"));
             focusView = privateKeyView;
             cancel = true;
         }
@@ -103,12 +104,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
             showProgress(true);
 
             Intent myIntent = new Intent(LoginActivity.this, tabbedActivity.class);

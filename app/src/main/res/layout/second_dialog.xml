@@ -17,11 +17,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/privateKeyDialog"
+        <AutoCompleteTextView
+            android:id="@+id/publicKeyDialog"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:hint="@string/prompt_password"
+            android:hint="@string/prompt_key"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+            android:singleLine="true" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/moneyDialog"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:hint="Amount"
             android:imeActionId="6"
             android:imeActionLabel="@string/action_sign_in_short"
             android:imeOptions="actionUnspecified"

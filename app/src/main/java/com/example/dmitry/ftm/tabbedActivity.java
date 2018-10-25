@@ -192,20 +192,25 @@ public class tabbedActivity extends AppCompatActivity {
     }
 
     public static class SecondFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
-        private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String POPUP_CONSTANT = "mPopup";
         private static final String POPUP_FORCE_SHOW_ICON = "setForceShowIcon";
 
-        ArrayAdapter<String> _adapter;
+        ArrayList<Integer> _operations;
+        CustomArrayAdapter _adapter;
         ListView _listView;
+
+        Integer _operationNum;
+        ArrayList<String> _froms;
+        ArrayList<String> _tos;
+        ArrayList<String> _mones;
 
         public SecondFragment() {
         }
 
-        public static SecondFragment newInstance(int sectionNumber) {
+        public static SecondFragment newInstance(String publicKey) {
             SecondFragment fragment = new SecondFragment();
             Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putString(INIT_PUBLIC_KEY, publicKey);
             fragment.setArguments(args);
             return fragment;
         }
@@ -214,9 +219,9 @@ public class tabbedActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_second, container, false);
 
-            ArrayList<String> operations = new ArrayList<String>();
+            _operations = new ArrayList<Integer>();
 
-            _adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, operations);
+            _adapter = new CustomArrayAdapter(getActivity(), _operations);
 
             _listView = (ListView) rootView.findViewById(R.id.operations);
             _listView.setAdapter(_adapter);
@@ -236,11 +241,45 @@ public class tabbedActivity extends AppCompatActivity {
                 }
             });
 
+            _operationNum = 0;
+
+            _froms = new ArrayList<String>();
+            _tos = new ArrayList<String>();
+            _mones = new ArrayList<String>();
+
             return rootView;
         }
 
-        protected void showInputDialog() {
+        public class CustomArrayAdapter extends ArrayAdapter<Integer> {
+            private final Context _context;
+            private final ArrayList<Integer> _values;
 
+            CustomArrayAdapter(Context context, ArrayList<Integer> values) {
+                super(context, R.layout.rowlayout, values);
+                this._context = context;
+                this._values = values;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View rowView = inflater.inflate(R.layout.row_layout_second, parent, false);
+
+                TextView fromView = (TextView) rowView.findViewById(R.id.from);
+                TextView toView = (TextView) rowView.findViewById(R.id.to);
+                TextView moneyView = (TextView) rowView.findViewById(R.id.money);
+
+                Integer num = _values.get(position);
+
+                fromView.setText(_froms.get(num));
+                toView.setText(_tos.get(num));
+                moneyView.setText(_mones.get(num));
+
+                return rowView;
+            }
+        }
+
+        protected void showInputDialog() {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View promptView = layoutInflater.inflate(R.layout.second_dialog, null);
 
@@ -250,23 +289,28 @@ public class tabbedActivity extends AppCompatActivity {
                     .show();
 
 
-            AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+            final Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
 
-            Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
-
-            Bundle bundle=getArguments();
-            ArrayList<String> publicKeyList = bundle.getStringArrayList("LIST");
+            ArrayList<String> publicKeyList = new ArrayList<String>();
+            publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, publicKeyList);
             dropdown.setAdapter(adapter);
 
-            EditText privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
+            final AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+            final EditText moneyView = (EditText) promptView.findViewById(R.id.moneyDialog);
 
-            Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(new View.OnClickListener() {
-
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    _froms.add(getArguments().getString(INIT_PUBLIC_KEY));
+                    _tos.add(publicKeyView.getText().toString());
+                    _mones.add(moneyView.getText().toString());
+
+                    _operations.add(_operationNum);
+                    _operationNum += 1;;
+                    _adapter.notifyDataSetChanged();
+
                     dialog.cancel();
                 }
             });
@@ -297,7 +341,7 @@ public class tabbedActivity extends AppCompatActivity {
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            String selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
+            Integer selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
             switch (item.getItemId()) {
                 case R.id.pmnuDelete:
                     Toast.makeText(this.getContext(), "You clicked delete on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
@@ -358,7 +402,7 @@ public class tabbedActivity extends AppCompatActivity {
                 case 0:
                     return FirstFragment.newInstance(_initPublicKey);
                 case 1:
-                    return SecondFragment.newInstance(6);
+                    return SecondFragment.newInstance(_initPublicKey);
                 default:
                     return ThirdFragment.newInstance(7);
             }

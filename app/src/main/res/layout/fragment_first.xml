@@ -67,6 +67,8 @@
         android:layout_marginTop="250dp"
         android:gravity="center"
         android:scaleType="centerCrop"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
 
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

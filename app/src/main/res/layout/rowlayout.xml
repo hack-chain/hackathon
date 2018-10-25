@@ -1,22 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
         android:id="@+id/publicKey"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
         android:text="@+id/label"
-        android:textSize="16sp" >
+        android:textSize="20sp"
+        android:textColor="@color/textColor">
     </TextView>
 
     <TextView
         android:id="@+id/money"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="30dp"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
         android:text="@+id/label"
-        android:textSize="16sp" >
+        android:textSize="16sp"
+        android:textColor="@color/textColor">
     </TextView>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

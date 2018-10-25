@@ -141,7 +141,7 @@ public class Identicon {
 
     public static class Options {
 
-        public static final Options DEFAULT = new Options(Color.WHITE, 7, 255);
+        private static final Options DEFAULT = new Options(Color.WHITE, 7, 255);
 
         int blankColor;
         int rows;

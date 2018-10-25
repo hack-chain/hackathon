@@ -36,6 +36,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
@@ -145,8 +146,8 @@ public class tabbedActivity extends AppCompatActivity {
 
                 publicKeyView.setTypeface(publicKeyView.getTypeface(), Typeface.BOLD);
 
-                getdata task = new getdata();
-                task._view = money;
+                GetAndSetBalanceAsync task = new GetAndSetBalanceAsync();
+                task._view = new WeakReference<TextView>(money);
                 task.execute(s);
 
                 ImageView image = (ImageView) rowView.findViewById(R.id.imageView);
@@ -180,51 +181,6 @@ public class tabbedActivity extends AppCompatActivity {
                     attemptLogin();
                 }
             });
-        }
-
-        public class getdata extends AsyncTask<String, String, String> {
-
-            HttpURLConnection urlConnection;
-            TextView _view;
-            @Override
-            protected String doInBackground(String... args) {
-
-                StringBuilder result = new StringBuilder();
-
-                try {
-                    String publicKey = args[0];
-                    URL url = new URL("http://18.221.128.6:8080/account/" + publicKey);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line);
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    urlConnection.disconnect();
-                }
-
-
-                return result.toString();
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                try {
-                    JSONObject mainObject = new JSONObject(result);
-                    String balance = mainObject.getString("balance");
-
-                    _view.setText("Balance: "+ balance);
-                } catch (Exception e) {
-
-                }
-            }
         }
 
         private void attemptLogin() {

@@ -2,13 +2,16 @@ package com.example.dmitry.ftm;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -26,6 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,34 +95,6 @@ public class tabbedActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_tabbed, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-    }
-
-
     public static class FirstFragment extends Fragment {
         private static final String PUBLIC_KEY = "PUBLIC KEY";
 
@@ -136,6 +112,9 @@ public class tabbedActivity extends AppCompatActivity {
         private EditText privateKeyView;
 
         private AlertDialog dialog;
+
+        SharedPreferences preferences;
+        public static final String MY_SHARED_PREFERENCES = "MySharedPrefs";
 
         public FirstFragment() {
         }
@@ -237,7 +216,6 @@ public class tabbedActivity extends AppCompatActivity {
                 return rowView;
             }
         }
-
 
         protected void showInputDialog() {
 
@@ -368,7 +346,17 @@ public class tabbedActivity extends AppCompatActivity {
         private static String POPUP_FORCE_SHOW_ICON = "setForceShowIcon";
         String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         ArrayAdapter<String> adapter;
-        ListView lvDays;
+        ListView listView;
+        FloatingActionButton fabView;
+
+        private LayoutInflater layoutInflater;
+        private View promptView;
+        private AutoCompleteTextView publicKeyView;
+        private EditText privateKeyView;
+
+        private AlertDialog dialog;
+
+        private ArrayList<String> arrayList;
 
         public SecondFragment() {
         }
@@ -387,18 +375,61 @@ public class tabbedActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_second, container, false);
 
             adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, days);
-            lvDays = (ListView) rootView.findViewById(R.id.lvDays);
-            lvDays.setAdapter(adapter);
-            lvDays.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            lvDays.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listView = (ListView) rootView.findViewById(R.id.lvDays);
+            listView.setAdapter(adapter);
+            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                    lvDays.setItemChecked(position, true);
+                    listView.setItemChecked(position, true);
                     showPopup(view);
                 }
             });
 
+            fabView = (FloatingActionButton) rootView.findViewById(R.id.fab);
+
+            fabView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showInputDialog();
+                }
+            });
+
             return rootView;
+        }
+
+        protected void showInputDialog() {
+
+            // get prompts.xml view
+            layoutInflater = LayoutInflater.from(getActivity());
+            promptView = layoutInflater.inflate(R.layout.second_dialog, null);
+
+            dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+
+
+            publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+
+            Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
+
+            Bundle bundle=getArguments();
+            arrayList = bundle.getStringArrayList("LIST");
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, arrayList);
+            dropdown.setAdapter(adapter);
+
+            privateKeyView = (EditText) promptView.findViewById(R.id.privateKeyDialog);
+
+            Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    dialog.cancel();
+                }
+            });
         }
 
         public void showPopup(View view) {
@@ -426,7 +457,7 @@ public class tabbedActivity extends AppCompatActivity {
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            String selectedItem = adapter.getItem(lvDays.getCheckedItemPosition());
+            String selectedItem = adapter.getItem(listView.getCheckedItemPosition());
             switch (item.getItemId()) {
                 case R.id.pmnuDelete:
                     Toast.makeText(this.getContext(), "You clicked delete on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
@@ -457,8 +488,8 @@ public class tabbedActivity extends AppCompatActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static ThirdFragment newInstance(int sectionNumber) {
+            ThirdFragment fragment = new ThirdFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -488,10 +519,9 @@ public class tabbedActivity extends AppCompatActivity {
                     return FirstFragment.newInstance(publicKey);
                 case 1:
                     return SecondFragment.newInstance(6);
-                case 2:
+                default:
                     return ThirdFragment.newInstance(7);
             }
-            return PlaceholderFragment.newInstance(0);
         }
 
         @Override

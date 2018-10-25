@@ -2,7 +2,6 @@ package com.example.dmitry.ftm;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -11,13 +10,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,46 +43,23 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class tabbedActivity extends AppCompatActivity {
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    private ViewPager mViewPager;
-
-    private String publicKey;
+    private static final String INIT_PUBLIC_KEY = "PUBLIC_KEY";
+    private String initPublicKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabbed);
 
-        publicKey = (String) getIntent().getStringExtra("PUBLIC_KEY");
+        SectionsPagerAdapter _SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        ViewPager _ViewPager = (ViewPager) findViewById(R.id.container);
+        _ViewPager.setAdapter(_SectionsPagerAdapter);
 
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_tabbed, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        initPublicKey = (String) getIntent().getStringExtra(INIT_PUBLIC_KEY);
     }
 
     public static class FirstFragment extends Fragment {
-        private static final String PUBLIC_KEY = "PUBLIC KEY";
-
         private ArrayList<String> arrayList;
         private ArrayAdapter<String> adapter;
         private Button addButtonView;
@@ -107,7 +81,7 @@ public class tabbedActivity extends AppCompatActivity {
         public static FirstFragment newInstance(String publicKey) {
             FirstFragment fragment = new FirstFragment();
             Bundle args = new Bundle();
-            args.putString(PUBLIC_KEY, publicKey);
+            args.putString(INIT_PUBLIC_KEY, publicKey);
             fragment.setArguments(args);
             return fragment;
         }
@@ -118,7 +92,7 @@ public class tabbedActivity extends AppCompatActivity {
 
             ListView listview =(ListView)rootView.findViewById(R.id.list);
             arrayList = new ArrayList<String> ();
-            arrayList.add(getArguments().getString(PUBLIC_KEY));
+            arrayList.add(getArguments().getString(INIT_PUBLIC_KEY));
 
             adapter = new MySimpleArrayAdapter(getActivity(), arrayList);
 
@@ -482,7 +456,7 @@ public class tabbedActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch(position) {
                 case 0:
-                    return FirstFragment.newInstance(publicKey);
+                    return FirstFragment.newInstance(initPublicKey);
                 case 1:
                     return SecondFragment.newInstance(6);
                 default:

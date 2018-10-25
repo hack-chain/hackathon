@@ -32,7 +32,6 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    // UI references.
     private AutoCompleteTextView publicKeyView;
     private EditText privateKeyView;
     private View mProgressView;

@@ -1,30 +1,12 @@
 package com.example.dmitry.ftm;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.MessageDigest;
 
-/**
- * Created by moxun on 16/11/28.
- */
-
 public class Identicon {
-
-    public static Bitmap createFromObject(Object seed) {
-        return create(Integer.toHexString(seed.hashCode()), Options.DEFAULT);
-    }
-
-    public static Bitmap createFromObject(Object seed, Options options) {
-        return create(Integer.toHexString(seed.hashCode()), options);
-    }
-
     public static Bitmap create(String seed) {
         return create(seed, Options.DEFAULT);
     }

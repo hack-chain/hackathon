@@ -305,7 +305,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
                 fromView.setText("From: " + _froms.get(num));
                 toView.setText("To: "+ _tos.get(num));
-                moneyView.setText("Amount: " + _mones.get(num));
+                moneyView.setText("Amount: " + _mones.get(num) + "FTM");
 
                 return rowView;
             }

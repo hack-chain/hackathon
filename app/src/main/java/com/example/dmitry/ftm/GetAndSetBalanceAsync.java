@@ -54,7 +54,7 @@ public class GetAndSetBalanceAsync extends AsyncTask<String, String, String> {
             String balance = mainObject.getString("balance");
 
             if (_view.get() != null) {
-                _view.get().setText("Balance: " + balance);
+                _view.get().setText("Balance: " + balance + " FTM");
             }
         } catch (Exception e) {
             e.printStackTrace();

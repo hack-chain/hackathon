@@ -305,7 +305,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
                 fromView.setText("From: " + _froms.get(num));
                 toView.setText("To: "+ _tos.get(num));
-                moneyView.setText("Amount: " + _mones.get(num) + "FTM");
+                moneyView.setText("Amount: " + _mones.get(num) + " FTM");
 
                 return rowView;
             }
@@ -431,16 +431,16 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             switch(position) {
                 case 0:
                     return FirstFragment.newInstance(_initPublicKey);
-                case 1:
-                    return SecondFragment.newInstance(_initPublicKey);
                 default:
-                    return ThirdFragment.newInstance(7);
+                    return SecondFragment.newInstance(_initPublicKey);
+                //default:
+                    //return ThirdFragment.newInstance(7);
             }
         }
 
         @Override
         public int getCount() {
-            return 3;
+            return 2;
         }
     }
 }

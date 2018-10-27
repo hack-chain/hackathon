@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -41,7 +40,11 @@ interface SendFrom {
     void sendFrom(String from, String to, String money);
 }
 
-public class tabbedActivity extends AppCompatActivity implements SendMessage, SendFrom {
+interface SendBack {
+    void sendBack(String from, String to, String money);
+}
+
+public class tabbedActivity extends AppCompatActivity implements SendMessage, SendFrom, SendBack {
     private static final String INIT_PUBLIC_KEY = "PUBLIC_KEY";
     private String _initPublicKey;
 
@@ -76,6 +79,13 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage, Se
         String tag = "android:switcher:" + R.id.container + ":" + 2;
         ThirdFragment f = (ThirdFragment) getSupportFragmentManager().findFragmentByTag(tag);
         f.displayReceivedFrom(from, to, money);
+    }
+
+    @Override
+    public void sendBack(String from, String to, String money) {
+        String tag = "android:switcher:" + R.id.container + ":" + 1;
+        SecondFragment f = (SecondFragment) getSupportFragmentManager().findFragmentByTag(tag);
+        f.displayReceivedBack(from, to, money);
     }
 
     public static class FirstFragment extends Fragment {
@@ -401,6 +411,16 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage, Se
             _publicKeyList.add(message);
         }
 
+        protected void displayReceivedBack(String from, String to, String money) {
+            _froms.add(from);
+            _tos.add(to);
+            _mones.add(money);
+
+            _operations.add(_operationNum);
+            _operationNum += 1;
+            _adapter.notifyDataSetChanged();
+        }
+
         @Override
         public void onAttach(Context context) {
             super.onAttach(context);
@@ -427,6 +447,8 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage, Se
         ArrayList<String> _mones;
 
         ArrayList<String> _publicKeyList;
+
+        SendBack SB;
 
         public ThirdFragment() {
         }
@@ -516,7 +538,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage, Se
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+            popup.getMenuInflater().inflate(R.menu.third_menu, popup.getMenu());
             popup.setOnMenuItemClickListener(this);
             popup.show();
         }
@@ -526,7 +548,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage, Se
             Integer selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
             switch (item.getItemId()) {
                 case R.id.pmnuEdit:
-                    Toast.makeText(this.getContext(), "You clicked edit on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
+                    SB.sendBack(_froms.get(selectedItem), _tos.get(selectedItem), _mones.get(selectedItem));
                     break;
             }
 
@@ -541,6 +563,17 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage, Se
             _operations.add(_operationNum);
             _operationNum += 1;
             _adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+
+            try {
+                SB = (SendBack) getActivity();
+            } catch (ClassCastException e) {
+                throw new ClassCastException("Error in retrieving data. Please try again");
+            }
         }
     }
 

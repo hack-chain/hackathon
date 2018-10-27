@@ -2,16 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="10dp">
 
-    <Spinner
-        android:id="@+id/spinner1"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/btn_dropdown"
-        android:spinnerMode="dropdown"/>
+        android:layout_height="wrap_content">
+
+        <Spinner
+            android:id="@+id/spinner1"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:spinnerMode="dropdown"/>
+
+    </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
@@ -21,7 +25,7 @@
             android:id="@+id/publicKeyDialog"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:hint="@string/prompt_key"
+            android:hint="To"
             android:inputType="textEmailAddress"
             android:maxLines="1"
             android:singleLine="true" />

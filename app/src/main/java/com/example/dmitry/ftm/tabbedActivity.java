@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -32,12 +33,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-public class tabbedActivity extends AppCompatActivity {
+interface SendMessage {
+    void sendData(String message);
+}
+
+public class tabbedActivity extends AppCompatActivity implements SendMessage{
     private static final String INIT_PUBLIC_KEY = "PUBLIC_KEY";
     private String _initPublicKey;
 
     private static final String INIT_PRIVATE_KEY = "PRIVATE_KEY";
     private String _initPrivateKey;
+
+    ViewPager _viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,16 +53,25 @@ public class tabbedActivity extends AppCompatActivity {
 
         SectionsPagerAdapter _SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        ViewPager _ViewPager = (ViewPager) findViewById(R.id.container);
-        _ViewPager.setAdapter(_SectionsPagerAdapter);
+        _viewPager = (ViewPager) findViewById(R.id.container);
+        _viewPager.setAdapter(_SectionsPagerAdapter);
 
         _initPublicKey = (String) getIntent().getStringExtra(INIT_PUBLIC_KEY);
         _initPrivateKey = (String) getIntent().getStringExtra(INIT_PRIVATE_KEY);
     }
 
+    @Override
+    public void sendData(String message) {
+        String tag = "android:switcher:" + R.id.container + ":" + 1;
+        SecondFragment f = (SecondFragment) getSupportFragmentManager().findFragmentByTag(tag);
+        f.displayReceivedData(message);
+    }
+
     public static class FirstFragment extends Fragment {
         private ArrayList<String> _arrayList;
         private ArrayAdapter<String> _adapter;
+
+        SendMessage SM;
 
         public FirstFragment() {}
 
@@ -173,6 +189,7 @@ public class tabbedActivity extends AppCompatActivity {
                         focusView.requestFocus();
                     } else {
                         _arrayList.add(publicKeyView.getText().toString());
+                        SM.sendData(publicKeyView.getText().toString());
                         _adapter.notifyDataSetChanged();
                         dialog.cancel();
                     }
@@ -189,6 +206,17 @@ public class tabbedActivity extends AppCompatActivity {
             //TODO: Replace this with your own logic
             return true;
         }
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+
+            try {
+                SM = (SendMessage) getActivity();
+            } catch (ClassCastException e) {
+                throw new ClassCastException("Error in retrieving data. Please try again");
+            }
+        }
     }
 
     public static class SecondFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
@@ -203,6 +231,8 @@ public class tabbedActivity extends AppCompatActivity {
         ArrayList<String> _froms;
         ArrayList<String> _tos;
         ArrayList<String> _mones;
+
+        ArrayList<String> _publicKeyList;
 
         public SecondFragment() {
         }
@@ -233,6 +263,8 @@ public class tabbedActivity extends AppCompatActivity {
                     showPopup(view);
                 }
             });
+
+            _publicKeyList = new ArrayList<String>();
 
             rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -271,9 +303,9 @@ public class tabbedActivity extends AppCompatActivity {
 
                 Integer num = _values.get(position);
 
-                fromView.setText(_froms.get(num));
-                toView.setText(_tos.get(num));
-                moneyView.setText(_mones.get(num));
+                fromView.setText("From: " + _froms.get(num));
+                toView.setText("To: "+ _tos.get(num));
+                moneyView.setText("Amount: " + _mones.get(num));
 
                 return rowView;
             }
@@ -291,10 +323,9 @@ public class tabbedActivity extends AppCompatActivity {
 
             final Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
 
-            ArrayList<String> publicKeyList = new ArrayList<String>();
-            publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
+            _publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, publicKeyList);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_text, _publicKeyList);
             dropdown.setAdapter(adapter);
 
             final AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
@@ -355,6 +386,11 @@ public class tabbedActivity extends AppCompatActivity {
             }
 
             return false;
+        }
+
+        protected void displayReceivedData(String message)
+        {
+            _publicKeyList.add(message);
         }
     }
 

@@ -374,14 +374,8 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
         public boolean onMenuItemClick(MenuItem item) {
             Integer selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
             switch (item.getItemId()) {
-                case R.id.pmnuDelete:
-                    Toast.makeText(this.getContext(), "You clicked delete on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
-                    break;
                 case R.id.pmnuEdit:
                     Toast.makeText(this.getContext(), "You clicked edit on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
-                    break;
-                case R.id.pmnuShare:
-                    Toast.makeText(this.getContext(), "You clicked share on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
                     break;
             }
 

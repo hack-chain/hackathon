@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -387,35 +386,171 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
         }
     }
 
-    public static class ThirdFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    public static class ThirdFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
+        private static final String POPUP_CONSTANT = "mPopup";
+        private static final String POPUP_FORCE_SHOW_ICON = "setForceShowIcon";
+
+        ArrayList<Integer> _operations;
+        ThirdFragment.CustomArrayAdapter _adapter;
+        ListView _listView;
+
+        Integer _operationNum;
+        ArrayList<String> _froms;
+        ArrayList<String> _tos;
+        ArrayList<String> _mones;
+
+        ArrayList<String> _publicKeyList;
 
         public ThirdFragment() {
         }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static ThirdFragment newInstance(int sectionNumber) {
+        public static ThirdFragment newInstance(String publicKey) {
             ThirdFragment fragment = new ThirdFragment();
             Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putString(INIT_PUBLIC_KEY, publicKey);
             fragment.setArguments(args);
             return fragment;
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_tabbed, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_second, container, false);
+
+            _operations = new ArrayList<Integer>();
+
+            _adapter = new ThirdFragment.CustomArrayAdapter(getActivity(), _operations);
+
+            _listView = (ListView) rootView.findViewById(R.id.operations);
+            _listView.setAdapter(_adapter);
+            _listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                    _listView.setItemChecked(position, true);
+                    showPopup(view);
+                }
+            });
+
+            _publicKeyList = new ArrayList<String>();
+            _publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
+
+            rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showInputDialog();
+                }
+            });
+
+            _operationNum = 0;
+
+            _froms = new ArrayList<String>();
+            _tos = new ArrayList<String>();
+            _mones = new ArrayList<String>();
+
             return rootView;
+        }
+
+        public class CustomArrayAdapter extends ArrayAdapter<Integer> {
+            private final Context _context;
+            private final ArrayList<Integer> _values;
+
+            CustomArrayAdapter(Context context, ArrayList<Integer> values) {
+                super(context, R.layout.rowlayout, values);
+                this._context = context;
+                this._values = values;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View rowView = inflater.inflate(R.layout.row_layout_second, parent, false);
+
+                TextView fromView = (TextView) rowView.findViewById(R.id.from);
+                TextView toView = (TextView) rowView.findViewById(R.id.to);
+                TextView moneyView = (TextView) rowView.findViewById(R.id.money);
+
+                Integer num = _values.get(position);
+
+                fromView.setText("From: " + _froms.get(num));
+                toView.setText("To: "+ _tos.get(num));
+                moneyView.setText("Amount: " + _mones.get(num) + " FTM");
+
+                return rowView;
+            }
+        }
+
+        protected void showInputDialog() {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            View promptView = layoutInflater.inflate(R.layout.second_dialog, null);
+
+            final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+
+
+            final Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
+
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_text, _publicKeyList);
+            dropdown.setAdapter(adapter);
+
+            final AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
+            final EditText moneyView = (EditText) promptView.findViewById(R.id.moneyDialog);
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    _froms.add(getArguments().getString(INIT_PUBLIC_KEY));
+                    _tos.add(publicKeyView.getText().toString());
+                    _mones.add(moneyView.getText().toString());
+
+                    _operations.add(_operationNum);
+                    _operationNum += 1;
+                    _adapter.notifyDataSetChanged();
+
+                    dialog.cancel();
+                }
+            });
+        }
+
+        public void showPopup(View view) {
+            PopupMenu popup = new PopupMenu(getActivity(), view);
+            try {
+                // Reflection apis to enforce show icon
+                Field[] fields = popup.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    if (field.getName().equals(POPUP_CONSTANT)) {
+                        field.setAccessible(true);
+                        Object menuPopupHelper = field.get(popup);
+                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                        Method setForceIcons = classPopupHelper.getMethod(POPUP_FORCE_SHOW_ICON, boolean.class);
+                        setForceIcons.invoke(menuPopupHelper, true);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+            popup.setOnMenuItemClickListener(this);
+            popup.show();
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Integer selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
+            switch (item.getItemId()) {
+                case R.id.pmnuEdit:
+                    Toast.makeText(this.getContext(), "You clicked edit on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
+            return false;
+        }
+
+        protected void displayReceivedData(String message) {
+            _publicKeyList.add(message);
         }
     }
 
@@ -430,16 +565,16 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             switch(position) {
                 case 0:
                     return FirstFragment.newInstance(_initPublicKey);
-                default:
+                case 1:
                     return SecondFragment.newInstance(_initPublicKey);
-                //default:
-                    //return ThirdFragment.newInstance(7);
+                default:
+                    return ThirdFragment.newInstance(_initPublicKey);
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     }
 }

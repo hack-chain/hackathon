@@ -5,12 +5,27 @@
     android:id="@+id/firstFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Your accounts"
+        android:imeActionId="6"
+        android:imeActionLabel="@string/action_sign_in_short"
+        android:imeOptions="actionUnspecified"
+        android:singleLine="true"
+        android:ellipsize="middle"
+        android:textSize="32sp"
+        android:paddingTop="20dp"
+        android:paddingLeft="20dp"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
     <ListView
         android:id="@+id/list"
-
         android:layout_width="match_parent"
         android:layout_height="575dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="100dp"
         android:gravity="center"
         android:scaleType="centerCrop"
         android:paddingLeft="20dp"

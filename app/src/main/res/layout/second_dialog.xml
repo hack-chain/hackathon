@@ -5,17 +5,24 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <android.support.design.widget.TextInputLayout
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@android:id/text1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="20dp"
+        android:hint="From: "
+        android:imeActionId="6"
+        android:imeActionLabel="@string/action_sign_in_short"
+        android:imeOptions="actionUnspecified"
+        android:singleLine="true"
+        android:ellipsize="middle"
+        android:textSize="16sp"/>
 
-        <Spinner
-            android:id="@+id/spinner1"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:spinnerMode="dropdown"/>
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:spinnerMode="dropdown"/>
 
-    </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"

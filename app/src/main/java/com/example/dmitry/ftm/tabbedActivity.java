@@ -339,7 +339,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
                     _mones.add(moneyView.getText().toString());
 
                     _operations.add(_operationNum);
-                    _operationNum += 1;;
+                    _operationNum += 1;
                     _adapter.notifyDataSetChanged();
 
                     dialog.cancel();

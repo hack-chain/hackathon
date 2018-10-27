@@ -265,6 +265,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             });
 
             _publicKeyList = new ArrayList<String>();
+            _publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
 
             rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -323,7 +324,6 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
             final Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
 
-            _publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_text, _publicKeyList);
             dropdown.setAdapter(adapter);
@@ -382,8 +382,7 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             return false;
         }
 
-        protected void displayReceivedData(String message)
-        {
+        protected void displayReceivedData(String message) {
             _publicKeyList.add(message);
         }
     }

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -36,7 +37,11 @@ interface SendMessage {
     void sendData(String message);
 }
 
-public class tabbedActivity extends AppCompatActivity implements SendMessage{
+interface SendFrom {
+    void sendFrom(String from, String to, String money);
+}
+
+public class tabbedActivity extends AppCompatActivity implements SendMessage, SendFrom {
     private static final String INIT_PUBLIC_KEY = "PUBLIC_KEY";
     private String _initPublicKey;
 
@@ -64,6 +69,13 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
         String tag = "android:switcher:" + R.id.container + ":" + 1;
         SecondFragment f = (SecondFragment) getSupportFragmentManager().findFragmentByTag(tag);
         f.displayReceivedData(message);
+    }
+
+    @Override
+    public void sendFrom(String from, String to, String money) {
+        String tag = "android:switcher:" + R.id.container + ":" + 2;
+        ThirdFragment f = (ThirdFragment) getSupportFragmentManager().findFragmentByTag(tag);
+        f.displayReceivedFrom(from, to, money);
     }
 
     public static class FirstFragment extends Fragment {
@@ -233,6 +245,8 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
         ArrayList<String> _publicKeyList;
 
+        SendFrom SF;
+
         public SecondFragment() {
         }
 
@@ -374,7 +388,9 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             Integer selectedItem = _adapter.getItem(_listView.getCheckedItemPosition());
             switch (item.getItemId()) {
                 case R.id.pmnuEdit:
-                    Toast.makeText(this.getContext(), "You clicked edit on Item : " + selectedItem, Toast.LENGTH_SHORT).show();
+
+                    SF.sendFrom(_froms.get(selectedItem), _tos.get(selectedItem), _mones.get(selectedItem));
+
                     break;
             }
 
@@ -383,6 +399,17 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
         protected void displayReceivedData(String message) {
             _publicKeyList.add(message);
+        }
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+
+            try {
+                SF = (SendFrom) getActivity();
+            } catch (ClassCastException e) {
+                throw new ClassCastException("Error in retrieving data. Please try again");
+            }
         }
     }
 
@@ -414,10 +441,9 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_second, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_third, container, false);
 
             _operations = new ArrayList<Integer>();
-
             _adapter = new ThirdFragment.CustomArrayAdapter(getActivity(), _operations);
 
             _listView = (ListView) rootView.findViewById(R.id.operations);
@@ -433,13 +459,6 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
 
             _publicKeyList = new ArrayList<String>();
             _publicKeyList.add(getArguments().getString(INIT_PUBLIC_KEY));
-
-            rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showInputDialog();
-                }
-            });
 
             _operationNum = 0;
 
@@ -479,41 +498,6 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             }
         }
 
-        protected void showInputDialog() {
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            View promptView = layoutInflater.inflate(R.layout.second_dialog, null);
-
-            final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setView(promptView)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show();
-
-
-            final Spinner dropdown = (Spinner) promptView.findViewById(R.id.spinner1);
-
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_text, _publicKeyList);
-            dropdown.setAdapter(adapter);
-
-            final AutoCompleteTextView publicKeyView = (AutoCompleteTextView) promptView.findViewById(R.id.publicKeyDialog);
-            final EditText moneyView = (EditText) promptView.findViewById(R.id.moneyDialog);
-
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    _froms.add(getArguments().getString(INIT_PUBLIC_KEY));
-                    _tos.add(publicKeyView.getText().toString());
-                    _mones.add(moneyView.getText().toString());
-
-                    _operations.add(_operationNum);
-                    _operationNum += 1;
-                    _adapter.notifyDataSetChanged();
-
-                    dialog.cancel();
-                }
-            });
-        }
-
         public void showPopup(View view) {
             PopupMenu popup = new PopupMenu(getActivity(), view);
             try {
@@ -549,8 +533,14 @@ public class tabbedActivity extends AppCompatActivity implements SendMessage{
             return false;
         }
 
-        protected void displayReceivedData(String message) {
-            _publicKeyList.add(message);
+        protected void displayReceivedFrom(String from, String to, String money) {
+            _froms.add(from);
+            _tos.add(to);
+            _mones.add(money);
+
+            _operations.add(_operationNum);
+            _operationNum += 1;
+            _adapter.notifyDataSetChanged();
         }
     }
 
